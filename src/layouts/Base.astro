@@ -1,0 +1,62 @@
+---
+import { SITE_NAME, SITE_DESCRIPTION } from "../config";
+import "../styles/global.css";
+
+interface Props {
+  /** Page title — shown in the browser tab as "Page Title | Site Name". */
+  title?: string;
+  /** Page description for SEO. Falls back to the global SITE_DESCRIPTION. */
+  description?: string;
+  /** Set to true on any page that contains a contact form. Loads the Turnstile script. */
+  hasContactForm?: boolean;
+}
+
+const {
+  title,
+  description = SITE_DESCRIPTION,
+  hasContactForm = false,
+} = Astro.props;
+
+const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{fullTitle}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    {/* Only load Turnstile on pages that need it */}
+    {hasContactForm && (
+      <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    )}
+
+    {/* Add custom fonts here — e.g. Google Fonts, Fontsource, or self-hosted */}
+  </head>
+  <body>
+    <slot name="header">
+      <header class="site-header">
+        <nav>
+          <a href="/" class="site-logo">{SITE_NAME}</a>
+          <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/contact">Contact</a>
+          </div>
+        </nav>
+      </header>
+    </slot>
+
+    <main>
+      <slot />
+    </main>
+
+    <slot name="footer">
+      <footer class="site-footer">
+        <p>&copy; {new Date().getFullYear()} {SITE_NAME}</p>
+      </footer>
+    </slot>
+  </body>
+</html>

@@ -1,0 +1,17 @@
+---
+import Base from "../layouts/Base.astro";
+import ContactForm from "../components/ContactForm.astro";
+---
+
+<Base title="Contact" hasContactForm>
+  <section class="section">
+    <div class="container">
+      <h1>Contact Us</h1>
+      <p>Fill out the form below and we'll get back to you as soon as possible.</p>
+
+      <div style="margin-top: 2rem;">
+        <ContactForm />
+      </div>
+    </div>
+  </section>
+</Base>

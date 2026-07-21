@@ -1,0 +1,170 @@
+---
+/**
+ * ContactForm.astro
+ * =================
+ * Drop-in contact form component. Handles Turnstile verification,
+ * API submission, loading/success/error states, and rate limiting.
+ *
+ * Usage:
+ *   <ContactForm />
+ *
+ * The form reads API_ENDPOINT, API_KEY, and TURNSTILE_SITE_KEY
+ * from src/config.ts. You do not need to pass any props.
+ *
+ * Styling: the component uses plain HTML with class names.
+ * Override styles in global.css or scope them to .contact-form.
+ */
+import { API_ENDPOINT, API_KEY, TURNSTILE_SITE_KEY } from "../config";
+---
+
+<div class="contact-form-wrapper" id="contact-form-wrapper">
+  {/* ── Form ─────────────────────────────────────────── */}
+  <form
+    id="contact-form"
+    class="contact-form"
+    novalidate
+    data-endpoint={API_ENDPOINT}
+    data-api-key={API_KEY}
+    data-turnstile-key={TURNSTILE_SITE_KEY}
+  >
+    <div class="form-group">
+      <label for="cf-name">Name <span class="required">*</span></label>
+      <input type="text" id="cf-name" name="name" required autocomplete="name" />
+    </div>
+
+    <div class="form-group">
+      <label for="cf-email">Email <span class="required">*</span></label>
+      <input type="email" id="cf-email" name="email" required autocomplete="email" />
+    </div>
+
+    <div class="form-group">
+      <label for="cf-message">Message <span class="required">*</span></label>
+      <textarea
+        id="cf-message"
+        name="message"
+        required
+        rows="5"
+        maxlength="5000"
+      ></textarea>
+    </div>
+
+    {/* Turnstile widget */}
+    <div class="cf-turnstile" data-sitekey={TURNSTILE_SITE_KEY}></div>
+
+    <button type="submit" id="cf-submit" class="form-submit">
+      Send Message
+    </button>
+
+    {/* Inline error messages */}
+    <div id="cf-error" class="form-status form-status--error" role="alert" aria-live="polite"></div>
+  </form>
+
+  {/* ── Success state (hidden by default) ────────────── */}
+  <div id="cf-success" class="form-success" hidden>
+    <p>Thank you! Your message has been sent. We'll get back to you soon.</p>
+  </div>
+</div>
+
+<script>
+  function initContactForm() {
+    const form = document.getElementById("contact-form") as HTMLFormElement | null;
+    const submitBtn = document.getElementById("cf-submit") as HTMLButtonElement | null;
+    const errorDiv = document.getElementById("cf-error") as HTMLDivElement | null;
+    const successDiv = document.getElementById("cf-success") as HTMLDivElement | null;
+    const wrapper = document.getElementById("contact-form-wrapper");
+
+    if (!form || !submitBtn || !errorDiv || !successDiv) return;
+
+    const endpoint = form.dataset.endpoint!;
+    const apiKey = form.dataset.apiKey!;
+
+    function showError(msg: string) {
+      errorDiv!.textContent = msg;
+      errorDiv!.hidden = false;
+    }
+
+    function clearError() {
+      errorDiv!.textContent = "";
+      errorDiv!.hidden = true;
+    }
+
+    function setLoading(loading: boolean) {
+      submitBtn!.disabled = loading;
+      submitBtn!.textContent = loading ? "Sending…" : "Send Message";
+    }
+
+    function resetTurnstile() {
+      if (typeof window.turnstile !== "undefined") {
+        window.turnstile.reset();
+      }
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearError();
+
+      // ── Client-side validation ──
+      const name = (form.querySelector("#cf-name") as HTMLInputElement).value.trim();
+      const email = (form.querySelector("#cf-email") as HTMLInputElement).value.trim();
+      const message = (form.querySelector("#cf-message") as HTMLTextAreaElement).value.trim();
+
+      if (!name || !email || !message) {
+        showError("Please fill in all required fields.");
+        return;
+      }
+
+      // ── Turnstile token ──
+      const turnstileInput = form.querySelector<HTMLInputElement>(
+        '[name="cf-turnstile-response"]'
+      );
+      const turnstileToken = turnstileInput?.value;
+
+      if (!turnstileToken) {
+        showError("Please complete the verification challenge.");
+        return;
+      }
+
+      // ── Submit ──
+      setLoading(true);
+
+      try {
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            api_key: apiKey,
+            turnstile_token: turnstileToken,
+            submission: { name, email, message },
+          }),
+        });
+
+        const data = await res.json();
+
+        if (data.status === "ok") {
+          // Show success, hide form
+          form.hidden = true;
+          successDiv.hidden = false;
+        } else if (data.errors) {
+          // Validation errors from the backend
+          const messages = Object.entries(data.errors)
+            .map(([field, errs]) => `${field}: ${(errs as string[]).join(", ")}`)
+            .join(" · ");
+          showError(messages);
+          resetTurnstile();
+        } else {
+          showError(data.message || "Something went wrong. Please try again.");
+          resetTurnstile();
+        }
+      } catch {
+        showError("Network error. Please check your connection and try again.");
+        resetTurnstile();
+      } finally {
+        setLoading(false);
+      }
+    });
+  }
+
+  // Run on initial load and on Astro client-side navigations
+  document.addEventListener("DOMContentLoaded", initContactForm);
+  document.addEventListener("astro:page-load", initContactForm);
+</script>
