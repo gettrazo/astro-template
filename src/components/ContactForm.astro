@@ -142,6 +142,8 @@ import { API_ENDPOINT, API_KEY, TURNSTILE_SITE_KEY } from "../config";
 
         if (data.status === "ok") {
           // Show success, hide form
+          form.reset();
+          resetTurnstile();
           form.hidden = true;
           successDiv.hidden = false;
         } else if (data.errors) {

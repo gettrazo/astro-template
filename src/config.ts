@@ -7,7 +7,7 @@
 // ============================================================
 
 /** The backend API endpoint URL. */
-export const API_ENDPOINT = "https://api.example.com/api/v1/submissions";
+export const API_ENDPOINT = "https://gettrazo.app/api/v1/submissions";
 
 /** The API key for this site (starts with sk_live_). */
 export const API_KEY = "sk_live_REPLACE_ME";
