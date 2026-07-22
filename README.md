@@ -1,24 +1,24 @@
 # Site Template
 
-Astro starter template with a pre-wired contact form. The form connects to a centralized backend (Trazo) that handles bot verification, email delivery, and submission storage — you don't set up any email service, database, or server-side code.
+Astro starter template with a pre-wired contact form. The form connects to a centralized backend (Trazo) that handles bot verification, email delivery, and submission storage. You don't set up any email service, database, or server-side code.
 
-This guide covers the full path: getting the code into your own private GitHub repo, configuring it, building your site, and deploying to **Cloudflare Pages**. Cloudflare Pages is the supported hosting path. If you want to deploy to Netlify, Vercel, or anything else, the output in `dist/` is plain static files and will work — but you're on your own for the setup.
+This guide covers the full path: getting the code into your own private GitHub repo, configuring it, building your site, and deploying to **Cloudflare Pages**. Cloudflare Pages is the supported hosting path. If you want to deploy to Netlify, Vercel, or anything else, the output in `dist/` is plain static files and will work.
 
 ## Prerequisites
 
 - [Node.js](https://nodejs.org) 20 or newer
 - [Git](https://git-scm.com) and a [GitHub](https://github.com) account
 - A [Cloudflare](https://dash.cloudflare.com/sign-up) account (free tier is fine)
-- Your three Trazo credentials (provided to you): the API endpoint, an API key (`sk_live_...`), and a Turnstile site key
+- Your Trazo credentials (API key (`sk_live_...`) and a Turnstile site key)
 - Optional but recommended: the [GitHub CLI](https://cli.github.com) (`gh`)
 
 ## Step 1 — Get the code into your own private repo
 
-Don't fork the template — you want a clean, private copy with its own history.
+Don't fork the template. You want a clean, private copy with its own history.
 
 ```bash
 # 1. Clone the template, then detach it from the template's history
-git clone <TEMPLATE_REPO_URL> my-client-site
+git clone https://github.com/gettrazo/astro-template my-client-site
 cd my-client-site
 rm -rf .git
 
@@ -39,14 +39,11 @@ git branch -M main
 git push -u origin main
 ```
 
-Keep the repo **private**. The API key you'll add in the next step is visible in the browser at runtime anyway (it's a site identifier, not a high-value secret — origin checks, Turnstile, and rate limiting are enforced server-side), but there's no reason to publish it.
-
 ## Step 2 — Configure
 
 Open `src/config.ts` and fill in the values you were given:
 
 ```ts
-export const API_ENDPOINT = "https://gettrazo.app/api/v1/submissions"; // already set
 export const API_KEY = "sk_live_your_key_here";
 export const TURNSTILE_SITE_KEY = "0x_your_turnstile_key_here";
 
@@ -77,7 +74,7 @@ Open `http://localhost:4321` and go to `/contact`. The form works from `localhos
 
 Replace the placeholder home page and styles with the client's actual site. See [Project Structure](#project-structure) and [Using the Contact Form](#using-the-contact-form) below for the rules.
 
-The fastest way is with an AI agent — this repo ships an `AGENTS.md` that teaches any coding agent (Claude Code, Codex, Cursor, Antigravity, OpenCode, …) the template's constraints. See [Building with an AI agent](#building-with-an-ai-agent).
+The fastest way is with an AI agent. This repo ships an `AGENTS.md` that teaches any coding agent (Claude Code, Codex, Cursor, Antigravity, OpenCode, …) the template's constraints. See [Building with an AI agent](#building-with-an-ai-agent).
 
 ## Step 5 — Deploy to Cloudflare Pages
 
