@@ -1,10 +1,10 @@
 /// <reference types="astro/client" />
 
-interface Window {
-  turnstile?: {
-    reset: (widgetId?: string) => void;
-    render: (container: string | HTMLElement, params: Record<string, unknown>) => string;
-    getResponse: (widgetId?: string) => string | undefined;
-    remove: (widgetId?: string) => void;
-  };
+/** The <cap-widget> custom element registered by the Cap widget script. */
+interface CapWidgetElement extends HTMLElement {
+  reset: () => void;
+}
+
+interface HTMLElementTagNameMap {
+  "cap-widget": CapWidgetElement;
 }

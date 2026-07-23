@@ -15,11 +15,11 @@ If the user provides content, use it verbatim — do not invent facts about the 
 
 ## Hard rules — never violate these
 
-- **Never edit the `<script>` block in `src/components/ContactForm.astro`** except when adding custom fields per the procedure below. It implements the backend API contract, error states, and Turnstile resets.
-- **Never change the form field `name` attributes** `name`, `email`, `message`, or the `data-endpoint` / `data-api-key` / `data-turnstile-key` attributes on the `<form>` tag.
-- **Never remove or move the Turnstile `<div class="cf-turnstile">`** — it must stay inside the `<form>`.
-- **Never change the values of `API_ENDPOINT`, `API_KEY`, or `TURNSTILE_SITE_KEY`** in `src/config.ts` unless the user explicitly provides new credentials.
-- **Every page containing `<ContactForm />` must pass `hasContactForm` to the `Base` layout** — this loads the Turnstile script in `<head>`. Without it the form cannot submit.
+- **Never edit the `<script>` block in `src/components/ContactForm.astro`** except when adding custom fields per the procedure below. It implements the backend API contract, error states, and Cap widget resets.
+- **Never change the form field `name` attributes** `name`, `email`, `message`, or the `data-endpoint` / `data-api-key` attributes on the `<form>` tag.
+- **Never remove or move the `<cap-widget>` element** — it must stay inside the `<form>`, and its `data-cap-api-endpoint` attribute must stay as is.
+- **Never change the values of `API_ENDPOINT`, `API_KEY`, `CAP_SITE_KEY`, or `CAP_BASE_URL`** in `src/config.ts` unless the user explicitly provides new credentials.
+- **Every page containing `<ContactForm />` must pass `hasContactForm` to the `Base` layout** — this loads the Cap widget script in `<head>`. Without it the form cannot submit.
 - **Never build alternative form submission logic** (no mailto, no third-party form services, no serverless functions). Trazo handles delivery.
 - **Keep the site fully static.** Do not add SSR adapters or server endpoints.
 
@@ -61,12 +61,12 @@ The backend accepts extra fields via a `custom_fields` object — flat, string v
    if (phone) customFields.phone = phone;
    if (Object.keys(customFields).length > 0) submission.custom_fields = customFields;
    ```
-3. Do not touch anything else in the handler — the request structure `{ api_key, turnstile_token, submission }` and the response/error handling must stay exactly as is.
+3. Do not touch anything else in the handler — the request structure `{ api_key, cap_token, submission }` and the response/error handling must stay exactly as is.
 
 ## Definition of done
 
 - `npm run build` succeeds with no errors.
 - Every page renders through `Base` with a real `title` and `description`.
-- The contact page passes `hasContactForm`, the Turnstile div is inside the form, and the form JS contract is untouched (except sanctioned `custom_fields` additions).
+- The contact page passes `hasContactForm`, the `<cap-widget>` is inside the form, and the form JS contract is untouched (except sanctioned `custom_fields` additions).
 - Nav links match the actual pages; no dead links.
 - No invented business facts; any placeholders are reported to the user.

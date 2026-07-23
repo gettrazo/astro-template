@@ -12,8 +12,11 @@ export const API_ENDPOINT = "https://gettrazo.app/api/v1/submissions";
 /** The API key for this site (starts with sk_live_). */
 export const API_KEY = "sk_live_REPLACE_ME";
 
-/** The Cloudflare Turnstile site key (public). */
-export const TURNSTILE_SITE_KEY = "0x_REPLACE_ME";
+/** The Cap site key (public). The widget endpoint is built from it. */
+export const CAP_SITE_KEY = "REPLACE_ME";
+
+/** The Cap server base URL. You should not need to change this. */
+export const CAP_BASE_URL = "https://cap.gettrazo.app";
 
 // ============================================================
 // Site Metadata (used in the base layout <head>)

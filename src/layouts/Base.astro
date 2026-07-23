@@ -7,7 +7,7 @@ interface Props {
   title?: string;
   /** Page description for SEO. Falls back to the global SITE_DESCRIPTION. */
   description?: string;
-  /** Set to true on any page that contains a contact form. Loads the Turnstile script. */
+  /** Set to true on any page that contains a contact form. Loads the Cap widget script. */
   hasContactForm?: boolean;
 }
 
@@ -29,9 +29,9 @@ const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
     <title>{fullTitle}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-    {/* Only load Turnstile on pages that need it */}
+    {/* Only load the Cap widget on pages that need it */}
     {hasContactForm && (
-      <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/cap-widget@0.1.56"></script>
     )}
 
     {/* Add custom fonts here — e.g. Google Fonts, Fontsource, or self-hosted */}

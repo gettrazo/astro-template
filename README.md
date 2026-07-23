@@ -9,7 +9,7 @@ This guide covers the full path: getting the code into your own private GitHub r
 - [Node.js](https://nodejs.org) 20 or newer
 - [Git](https://git-scm.com) and a [GitHub](https://github.com) account
 - A [Cloudflare](https://dash.cloudflare.com/sign-up) account (free tier is fine)
-- Your Trazo credentials (API key (`sk_live_...`) and a Turnstile site key)
+- Your Trazo credentials (API key (`sk_live_...`) and a Cap site key)
 - Optional but recommended: the [GitHub CLI](https://cli.github.com) (`gh`)
 
 ## Step 1 — Get the code into your own private repo
@@ -45,7 +45,7 @@ Open `src/config.ts` and fill in the values you were given:
 
 ```ts
 export const API_KEY = "sk_live_your_key_here";
-export const TURNSTILE_SITE_KEY = "0x_your_turnstile_key_here";
+export const CAP_SITE_KEY = "your_cap_site_key_here";
 
 export const SITE_NAME = "Your Client's Name";
 export const SITE_DESCRIPTION = "One-sentence description for SEO.";
@@ -68,7 +68,7 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:4321` and go to `/contact`. The form works from `localhost` out of the box — the backend allows `localhost` and `127.0.0.1` origins during development, and Turnstile supports localhost by default. Submit a test message and confirm you see the success state.
+Open `http://localhost:4321` and go to `/contact`. The form works from `localhost` out of the box — the backend allows `localhost` and `127.0.0.1` origins during development, and the Cap widget works on localhost with no special configuration. Submit a test message and confirm you see the success state.
 
 ## Step 4 — Build your site
 
@@ -141,7 +141,7 @@ src/
 
 ## Using the Contact Form
 
-Import and drop it on any page. The only requirement is setting `hasContactForm` on the layout so the Turnstile script loads:
+Import and drop it on any page. The only requirement is setting `hasContactForm` on the layout so the Cap widget script loads:
 
 ```astro
 ---
@@ -158,9 +158,9 @@ import ContactForm from "../components/ContactForm.astro";
 
 1. Collects name, email, and message
 2. Validates required fields client-side
-3. Verifies the user with a Cloudflare Turnstile challenge
+3. Verifies the user with a [Cap](https://capjs.js.org) proof-of-work challenge (no puzzles — the browser does a small computation instead)
 4. POSTs the data to the backend API as JSON
-5. Shows a success message or displays errors inline, resetting Turnstile either way
+5. Shows a success message or displays errors inline, resetting the Cap widget either way
 
 ### What you can customize
 
@@ -173,8 +173,8 @@ import ContactForm from "../components/ContactForm.astro";
 
 - **The form field `name` attributes** (`name`, `email`, `message`) — the backend expects these exact keys.
 - **The `data-*` attributes on the `<form>` tag** — the JS reads the API config from these.
-- **The Turnstile `<div>`** — it must stay inside the form.
-- **The submission JS logic** — it handles the API contract, error states, and Turnstile resets.
+- **The `<cap-widget>` element** — it must stay inside the form.
+- **The submission JS logic** — it handles the API contract, error states, and Cap widget resets.
 
 Extra fields (phone, company, subject, …) are supported by the backend via `custom_fields`, but wiring them up means extending the submission JS — ask before doing this, or have the AI agent do it following the skill's instructions.
 
@@ -271,7 +271,7 @@ Any tool that can read files works: start your session with *"Read AGENTS.md at 
 
 ## Checklist Before Handoff
 
-- [ ] `src/config.ts` has the real API key and Turnstile site key
+- [ ] `src/config.ts` has the real API key and Cap site key
 - [ ] `astro.config.mjs` has the production `site` URL
 - [ ] Repo is **private** on GitHub
 - [ ] Cloudflare Pages connected to the repo, auto-deploys on push to `main`

@@ -2,19 +2,21 @@
 /**
  * ContactForm.astro
  * =================
- * Drop-in contact form component. Handles Turnstile verification,
+ * Drop-in contact form component. Handles Cap verification,
  * API submission, loading/success/error states, and rate limiting.
  *
  * Usage:
  *   <ContactForm />
  *
- * The form reads API_ENDPOINT, API_KEY, and TURNSTILE_SITE_KEY
- * from src/config.ts. You do not need to pass any props.
+ * The form reads API_ENDPOINT, API_KEY, CAP_SITE_KEY, and
+ * CAP_BASE_URL from src/config.ts. You do not need to pass any props.
  *
  * Styling: the component uses plain HTML with class names.
  * Override styles in global.css or scope them to .contact-form.
  */
-import { API_ENDPOINT, API_KEY, TURNSTILE_SITE_KEY } from "../config";
+import { API_ENDPOINT, API_KEY, CAP_SITE_KEY, CAP_BASE_URL } from "../config";
+
+const capEndpoint = `${CAP_BASE_URL}/${CAP_SITE_KEY}/`;
 ---
 
 <div class="contact-form-wrapper" id="contact-form-wrapper">
@@ -25,7 +27,6 @@ import { API_ENDPOINT, API_KEY, TURNSTILE_SITE_KEY } from "../config";
     novalidate
     data-endpoint={API_ENDPOINT}
     data-api-key={API_KEY}
-    data-turnstile-key={TURNSTILE_SITE_KEY}
   >
     <div class="form-group">
       <label for="cf-name">Name <span class="required">*</span></label>
@@ -48,8 +49,8 @@ import { API_ENDPOINT, API_KEY, TURNSTILE_SITE_KEY } from "../config";
       ></textarea>
     </div>
 
-    {/* Turnstile widget */}
-    <div class="cf-turnstile" data-sitekey={TURNSTILE_SITE_KEY}></div>
+    {/* Cap widget */}
+    <cap-widget data-cap-api-endpoint={capEndpoint}></cap-widget>
 
     <button type="submit" id="cf-submit" class="form-submit">
       Send Message
@@ -77,6 +78,7 @@ import { API_ENDPOINT, API_KEY, TURNSTILE_SITE_KEY } from "../config";
 
     const endpoint = form.dataset.endpoint!;
     const apiKey = form.dataset.apiKey!;
+    const capWidget = form.querySelector("cap-widget");
 
     function showError(msg: string) {
       errorDiv!.textContent = msg;
@@ -93,10 +95,8 @@ import { API_ENDPOINT, API_KEY, TURNSTILE_SITE_KEY } from "../config";
       submitBtn!.textContent = loading ? "Sending…" : "Send Message";
     }
 
-    function resetTurnstile() {
-      if (typeof window.turnstile !== "undefined") {
-        window.turnstile.reset();
-      }
+    function resetCap() {
+      capWidget?.reset();
     }
 
     form.addEventListener("submit", async (e) => {
@@ -113,13 +113,11 @@ import { API_ENDPOINT, API_KEY, TURNSTILE_SITE_KEY } from "../config";
         return;
       }
 
-      // ── Turnstile token ──
-      const turnstileInput = form.querySelector<HTMLInputElement>(
-        '[name="cf-turnstile-response"]'
-      );
-      const turnstileToken = turnstileInput?.value;
+      // ── Cap token ──
+      const capInput = form.querySelector<HTMLInputElement>('[name="cap-token"]');
+      const capToken = capInput?.value;
 
-      if (!turnstileToken) {
+      if (!capToken) {
         showError("Please complete the verification challenge.");
         return;
       }
@@ -133,7 +131,7 @@ import { API_ENDPOINT, API_KEY, TURNSTILE_SITE_KEY } from "../config";
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             api_key: apiKey,
-            turnstile_token: turnstileToken,
+            cap_token: capToken,
             submission: { name, email, message },
           }),
         });
@@ -143,7 +141,7 @@ import { API_ENDPOINT, API_KEY, TURNSTILE_SITE_KEY } from "../config";
         if (data.status === "ok") {
           // Show success, hide form
           form.reset();
-          resetTurnstile();
+          resetCap();
           form.hidden = true;
           successDiv.hidden = false;
         } else if (data.errors) {
@@ -152,14 +150,14 @@ import { API_ENDPOINT, API_KEY, TURNSTILE_SITE_KEY } from "../config";
             .map(([field, errs]) => `${field}: ${(errs as string[]).join(", ")}`)
             .join(" · ");
           showError(messages);
-          resetTurnstile();
+          resetCap();
         } else {
           showError(data.message || "Something went wrong. Please try again.");
-          resetTurnstile();
+          resetCap();
         }
       } catch {
         showError("Network error. Please check your connection and try again.");
-        resetTurnstile();
+        resetCap();
       } finally {
         setLoading(false);
       }
